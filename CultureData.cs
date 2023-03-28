@@ -2,8 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TaleWorlds.CampaignSystem;
 using TaleWorlds.CampaignSystem.Settlements;
 using TaleWorlds.SaveSystem;
@@ -48,11 +46,21 @@ namespace CulturalDrift {
             }
             catch (Exception) { return; }
 
-            UpdateCultureDataWithDominantCulture(settlementNewCulture, GlobalSettings<MCMConfig>.Instance.SettlementDailyMod);
+            float modToUse = settlement.IsCastle ? GlobalSettings<MCMConfig>.Instance.CastleDailyMod : GlobalSettings<MCMConfig>.Instance.TownDailyMod;
+
+            UpdateCultureDataWithDominantCulture(settlementNewCulture, modToUse);
             settlement.Culture = GetMainCulture();
-            if (settlement.Notables.Count > 0)
-                foreach (Hero notable in settlement.Notables)
-                    notable.Culture = settlement.Culture;
+
+            if (settlement.Notables.Count > 0) {
+                foreach (Hero notable in settlement.Notables) {
+                    CultureObject cultureToChangeNotableTo = settlement.Culture;
+
+                    if (settlement.OwnerClan.Kingdom != null && SubModule.Random.NextDouble() < 0.5)
+                        cultureToChangeNotableTo = settlement.OwnerClan.Kingdom.Culture;
+
+                    notable.Culture = cultureToChangeNotableTo;
+                }
+            }
         }
 
         public void UpdateCultureDataAsClan(Clan clan) {

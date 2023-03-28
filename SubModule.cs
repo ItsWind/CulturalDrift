@@ -1,13 +1,13 @@
 ﻿using HarmonyLib;
-using System.Collections.Generic;
+using System;
 using TaleWorlds.CampaignSystem;
-using TaleWorlds.CampaignSystem.Settlements;
 using TaleWorlds.Core;
-using TaleWorlds.Library;
 using TaleWorlds.MountAndBlade;
 
 namespace CulturalDrift {
     public class SubModule : MBSubModuleBase {
+        public static Random Random = new();
+
         protected override void OnSubModuleLoad() {
             new Harmony("Windwhistle.CulturalDrift").PatchAll();
         }
