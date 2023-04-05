@@ -50,17 +50,7 @@ namespace CulturalDrift {
 
             UpdateCultureDataWithDominantCulture(settlementNewCulture, modToUse);
             settlement.Culture = GetMainCulture();
-
-            if (settlement.Notables.Count > 0) {
-                foreach (Hero notable in settlement.Notables) {
-                    CultureObject cultureToChangeNotableTo = settlement.Culture;
-
-                    if (settlement.OwnerClan.Kingdom != null && SubModule.Random.NextDouble() < 0.5)
-                        cultureToChangeNotableTo = settlement.OwnerClan.Kingdom.Culture;
-
-                    notable.Culture = cultureToChangeNotableTo;
-                }
-            }
+            UpdateSettlementNotablesCulture(settlement);
         }
 
         public void UpdateCultureDataAsClan(Clan clan) {
@@ -83,12 +73,6 @@ namespace CulturalDrift {
             clan.Culture = GetMainCulture();
         }
 
-        // TRY LATER
-        /*private float kingdomDailyMod = 1f;
-        public void UpdateCultureDataAsKingdom(Kingdom kingdom) {
-            kingdom.Chan
-        }*/
-
         public CultureObject GetMainCulture() {
             return CultureFloats.Aggregate((l, r) => l.Value > r.Value ? l : r).Culture;
         }
@@ -107,6 +91,51 @@ namespace CulturalDrift {
 
             if (needToCreate)
                 CultureFloats.Add(new CultureFloat(domCulture, modToUse));
+        }
+
+        private void UpdateSettlementNotablesCulture(Settlement settlement) {
+            if (settlement.Notables.Count <= 0)
+                return;
+
+            int settlementTroopWeight = GlobalSettings<MCMConfig>.Instance.SettlementCultureTroopSpawnWeight;
+            int defaultTroopWeight = GlobalSettings<MCMConfig>.Instance.DefaultCultureTroopSpawnWeight;
+            int clanTroopWeight = GlobalSettings<MCMConfig>.Instance.OwnerClanCultureTroopSpawnWeight;
+            int kingdomTroopWeight = GlobalSettings<MCMConfig>.Instance.KingdomCultureTroopSpawnWeight;
+
+            int totalWeight = settlementTroopWeight + defaultTroopWeight + clanTroopWeight + kingdomTroopWeight;
+
+            Dictionary<(int, int), CultureObject> cultureMap = new();
+            cultureMap[(1, settlementTroopWeight)] = settlement.Culture;
+
+            int currentMin = settlementTroopWeight;
+            if (defaultTroopWeight > 0 && DefaultCulture != null) {
+                cultureMap[(currentMin, currentMin + defaultTroopWeight)] = DefaultCulture;
+                currentMin += defaultTroopWeight;
+            }
+            
+            if (settlement.OwnerClan != null) {
+                if (clanTroopWeight > 0) {
+                    cultureMap[(currentMin, currentMin + clanTroopWeight)] = settlement.OwnerClan.Culture;
+                    currentMin += clanTroopWeight;
+                }
+
+                if (kingdomTroopWeight > 0 && settlement.OwnerClan.Kingdom != null)
+                    cultureMap[(currentMin, currentMin + kingdomTroopWeight)] = settlement.OwnerClan.Kingdom.Culture;
+            }
+
+            foreach (Hero notable in settlement.Notables) {
+                int randNum = SubModule.Random.Next(1, totalWeight);
+
+                foreach (KeyValuePair<(int, int), CultureObject> kvp in cultureMap) {
+                    int min = kvp.Key.Item1;
+                    int max = kvp.Key.Item2;
+
+                    if (randNum >= min && randNum < max) {
+                        notable.Culture = kvp.Value;
+                        break;
+                    }
+                }
+            }
         }
     }
 }
