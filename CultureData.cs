@@ -50,7 +50,6 @@ namespace CulturalDrift {
 
             UpdateCultureDataWithDominantCulture(settlementNewCulture, modToUse);
             settlement.Culture = GetMainCulture();
-            UpdateSettlementNotablesCulture(settlement);
         }
 
         public void UpdateCultureDataAsClan(Clan clan) {
@@ -73,29 +72,17 @@ namespace CulturalDrift {
             clan.Culture = GetMainCulture();
         }
 
+        public void ForceCultureData(CultureObject newCulture) {
+            UpdateCultureDataWithDominantCulture(newCulture, 1000);
+        }
+
         public CultureObject GetMainCulture() {
             return CultureFloats.Aggregate((l, r) => l.Value > r.Value ? l : r).Culture;
         }
 
-        private void UpdateCultureDataWithDominantCulture(CultureObject domCulture, float modToUse) {
-            bool needToCreate = true;
-
-            foreach (CultureFloat cf in CultureFloats) {
-                if (cf.Culture != domCulture)
-                    cf.ModifyValue(-modToUse);
-                else {
-                    needToCreate = false;
-                    cf.ModifyValue(modToUse);
-                }
-            }
-
-            if (needToCreate)
-                CultureFloats.Add(new CultureFloat(domCulture, modToUse));
-        }
-
-        private void UpdateSettlementNotablesCulture(Settlement settlement) {
+        public CultureObject? GetRandomSettlementSpawnCulture(Settlement settlement) {
             if (settlement.Notables.Count <= 0)
-                return;
+                return null;
 
             int settlementTroopWeight = GlobalSettings<MCMConfig>.Instance.SettlementCultureTroopSpawnWeight;
             int defaultTroopWeight = GlobalSettings<MCMConfig>.Instance.DefaultCultureTroopSpawnWeight;
@@ -112,7 +99,7 @@ namespace CulturalDrift {
                 cultureMap[(currentMin, currentMin + defaultTroopWeight)] = DefaultCulture;
                 currentMin += defaultTroopWeight;
             }
-            
+
             if (settlement.OwnerClan != null) {
                 if (clanTroopWeight > 0) {
                     cultureMap[(currentMin, currentMin + clanTroopWeight)] = settlement.OwnerClan.Culture;
@@ -123,19 +110,34 @@ namespace CulturalDrift {
                     cultureMap[(currentMin, currentMin + kingdomTroopWeight)] = settlement.OwnerClan.Kingdom.Culture;
             }
 
-            foreach (Hero notable in settlement.Notables) {
-                int randNum = SubModule.Random.Next(1, totalWeight);
+            int randNum = SubModule.Random.Next(1, totalWeight);
 
-                foreach (KeyValuePair<(int, int), CultureObject> kvp in cultureMap) {
-                    int min = kvp.Key.Item1;
-                    int max = kvp.Key.Item2;
+            foreach (KeyValuePair<(int, int), CultureObject> kvp in cultureMap) {
+                int min = kvp.Key.Item1;
+                int max = kvp.Key.Item2;
 
-                    if (randNum >= min && randNum < max) {
-                        notable.Culture = kvp.Value;
-                        break;
-                    }
+                if (randNum >= min && randNum < max) {
+                    return kvp.Value;
                 }
             }
+
+            return null;
+        }
+
+        private void UpdateCultureDataWithDominantCulture(CultureObject domCulture, float modToUse) {
+            bool needToCreate = true;
+
+            foreach (CultureFloat cf in CultureFloats) {
+                if (cf.Culture != domCulture)
+                    cf.ModifyValue(-modToUse);
+                else {
+                    needToCreate = false;
+                    cf.ModifyValue(modToUse);
+                }
+            }
+
+            if (needToCreate)
+                CultureFloats.Add(new CultureFloat(domCulture, modToUse));
         }
     }
 }

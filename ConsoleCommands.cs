@@ -2,6 +2,7 @@
 using TaleWorlds.CampaignSystem;
 using TaleWorlds.CampaignSystem.Settlements;
 using TaleWorlds.Library;
+using TaleWorlds.ObjectSystem;
 
 namespace CulturalDrift {
     public class ConsoleCommands {
@@ -41,32 +42,75 @@ namespace CulturalDrift {
         }
 
         [CommandLineFunctionality.CommandLineArgumentFunction("debug_change_hero_culture", "culturaldrift")]
-        private static string DebugPopBabyWithWife(List<string> args) {
+        private static string DebugChangeHeroCulture(List<string> args) {
             if (args.Count < 2) {
-                return "Proper usage: culturaldrift.debug_change_hero_culture HeroNameToChangeCulture HeroNameToCopyCultureFrom.";
+                return "Proper usage: culturaldrift.debug_change_hero_culture HeroNameToChangeCulture CultureName.";
             } else {
-                string heroNameToChange = args[0].ToLower();
-                string heroNameToCopyCultureFrom = args[1].ToLower();
+                string givenHeroNameToChange = args[0].ToLower();
+                string givenCultureName = args[1].ToLower();
                 Hero? heroToChange = null;
-                Hero? heroToCopyCultureFrom = null;
+                CultureObject? cultureToChangeTo = null;
 
                 foreach (Hero hero in Campaign.Current.AliveHeroes) {
-                    string heroName = hero.GetName().ToString().ToLower().Replace(" ", "");
-                    if (heroName == heroNameToChange)
+                    string heroName = hero.Name.ToString().ToLower().Replace(" ", "");
+                    if (heroName == givenHeroNameToChange) {
                         heroToChange = hero;
-                    else if (heroName == heroNameToCopyCultureFrom)
-                        heroToCopyCultureFrom = hero;
+                        break;
+                    }
+                }
+
+                foreach (CultureObject culture in MBObjectManager.Instance.GetObjectTypeList<CultureObject>()) {
+                    string cultureName = culture.Name.ToString().ToLower().Replace(" ", "");
+                    if (cultureName == givenCultureName) {
+                        cultureToChangeTo = culture;
+                        break;
+                    }
                 }
 
                 if (heroToChange == null)
-                    return "First hero name given not found. Try without spaces and check for spelling.";
-                else if (heroToCopyCultureFrom == null)
-                    return "Second hero name given not found. Try without spaces and check for spelling.";
-                else if (heroToCopyCultureFrom.Culture == null)
-                    return "Second hero has no valid culture to copy from.";
+                    return "Hero name given not found. Try without spaces and check for spelling.";
+                else if (cultureToChangeTo == null)
+                    return "Culture name given not found. Try without spaces and check for spelling.";
 
-                heroToChange.Culture = heroToCopyCultureFrom.Culture;
-                return heroToChange.Name.ToString() + " changed to " + heroToCopyCultureFrom.Culture.Name.ToString();
+                heroToChange.Culture = cultureToChangeTo;
+                return heroToChange.Name.ToString() + " changed to " + cultureToChangeTo.Name.ToString();
+            }
+        }
+
+        [CommandLineFunctionality.CommandLineArgumentFunction("debug_change_clan_culture", "culturaldrift")]
+        private static string DebugChangeClanCulture(List<string> args) {
+            if (args.Count < 2) {
+                return "Proper usage: culturaldrift.debug_change_clan_culture ClanNameToChangeCulture CultureName.";
+            } else {
+                string givenClanName = args[0].ToLower();
+                string givenCultureName = args[1].ToLower();
+                Clan? clanToChange = null;
+                CultureObject? cultureToChangeTo = null;
+
+                foreach (Clan clan in Campaign.Current.Clans) {
+                    string clanName = clan.Name.ToString().ToLower().Replace(" ", "");
+                    if (clanName == givenClanName) {
+                        clanToChange = clan;
+                        break;
+                    }
+                }
+
+                foreach (CultureObject culture in MBObjectManager.Instance.GetObjectTypeList<CultureObject>()) {
+                    string cultureName = culture.Name.ToString().ToLower().Replace(" ", "");
+                    if (cultureName == givenCultureName) {
+                        cultureToChangeTo = culture;
+                        break;
+                    }
+                }
+
+                if (clanToChange == null)
+                    return "Clan name given not found. Try without spaces and check for spelling.";
+                else if (cultureToChangeTo == null)
+                    return "Culture name given not found. Try without spaces and check for spelling.";
+
+                CulturalDriftBehavior.ClanCultureData[clanToChange].ForceCultureData(cultureToChangeTo);
+                clanToChange.Culture = cultureToChangeTo;
+                return clanToChange.Name.ToString() + " changed to " + cultureToChangeTo.Name.ToString();
             }
         }
     }

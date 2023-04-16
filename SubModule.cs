@@ -14,8 +14,8 @@ namespace CulturalDrift {
         }
 
         protected override void OnGameStart(Game game, IGameStarter gameStarter) {
-            base.OnGameStart(game, gameStarter);
-
+            gameStarter.AddModel(new NewVolunteerModel());
+            
             if (game.GameType is Campaign) {
                 CampaignGameStarter campaignStarter = (CampaignGameStarter)gameStarter;
 

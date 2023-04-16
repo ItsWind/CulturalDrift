@@ -11,7 +11,6 @@ namespace CulturalDrift {
     public class CulturalDriftBehavior : CampaignBehaviorBase {
         public static Dictionary<Settlement, CultureData> SettlementCultureData = new();
         public static Dictionary<Clan, CultureData> ClanCultureData = new();
-        public static Dictionary<Kingdom, CultureData> KingdomCultureData = new();
 
         public override void RegisterEvents() {
             CampaignEvents.DailyTickSettlementEvent.AddNonSerializedListener(this, (settlement) => {
@@ -32,13 +31,11 @@ namespace CulturalDrift {
                 
                 ClanCultureData[clan].UpdateCultureDataAsClan(clan);
             });
-            // Kingdom tick is embedded in clan tick DO LATER
         }
 
         public override void SyncData(IDataStore dataStore) {
             dataStore.SyncData("SettlementCultureData", ref SettlementCultureData);
             dataStore.SyncData("ClanCultureData", ref ClanCultureData);
-            dataStore.SyncData("KingdomCultureData", ref KingdomCultureData);
 
             if (dataStore.IsLoading) {
                 // Set settlement cultures, as they do not save/load on their own.
