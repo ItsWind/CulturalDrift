@@ -5,7 +5,7 @@ using TaleWorlds.Core;
 
 namespace CulturalDrift.Patches {
     [HarmonyPatch(typeof(HeroCreator), nameof(HeroCreator.DeliverOffSpring))]
-    internal class ConceiveChildPatch {
+    internal class DeliverOffSpringPatch {
         [HarmonyPostfix]
         private static void Postfix(ref Hero __result) {
             if (!GlobalSettings<MCMConfig>.Instance.BirthCultureModifier)

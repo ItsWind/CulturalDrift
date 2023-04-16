@@ -53,12 +53,12 @@ namespace CulturalDrift {
         }
 
         public void UpdateCultureDataAsClan(Clan clan) {
-            if (clan.Heroes.Count < 1)
+            if (clan.Lords.Count < 1)
                 return;
 
             Dictionary<CultureObject, int> amountsOfCulture = new();
-            foreach (Hero hero in clan.Heroes) {
-                if (hero.Culture == null)
+            foreach (Hero hero in clan.Lords) {
+                if (hero.Culture == null || !hero.IsAlive)
                     continue;
 
                 if (!amountsOfCulture.ContainsKey(hero.Culture))

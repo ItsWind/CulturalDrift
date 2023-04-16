@@ -18,8 +18,7 @@ namespace CulturalDrift {
         private static string DebugPrintClanCulture(List<string> args) {
             if (args.Count < 1) {
                 return "Need clan name.";
-            }
-            else {
+            } else {
                 string clanNameGiven = args[0];
                 foreach (Clan clan in Campaign.Current.Clans)
                     if (clan.Name.ToString().ToLower().Replace(" ", "") == clanNameGiven.ToLower())
