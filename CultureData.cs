@@ -34,6 +34,22 @@ namespace CulturalDrift {
         [SaveableField(2)]
         public List<CultureFloat> CultureFloats = new();
 
+        public static CultureData? GetFor(Settlement settlement) {
+            try {
+                return CulturalDriftBehavior.SettlementCultureData[settlement];
+            }
+            catch (KeyNotFoundException) {
+                return null;
+            }
+        }
+        public static CultureData? GetFor(Clan clan) {
+            try {
+                return CulturalDriftBehavior.ClanCultureData[clan];
+            } catch (KeyNotFoundException) {
+                return null;
+            }
+        }
+
         public CultureData(CultureObject defaultCulture) {
             DefaultCulture = defaultCulture;
             CultureFloats.Add(new CultureFloat(defaultCulture, 100f));
@@ -42,7 +58,7 @@ namespace CulturalDrift {
         public void UpdateCultureDataAsSettlement(Settlement settlement) {
             CultureObject? settlementNewCulture = null;
             try {
-                settlementNewCulture = settlement.Owner.Culture;
+                settlementNewCulture = settlement.Owner.Clan.Culture;
             }
             catch (Exception) { return; }
 
@@ -53,12 +69,12 @@ namespace CulturalDrift {
         }
 
         public void UpdateCultureDataAsClan(Clan clan) {
-            if (clan.Lords.Count < 1)
+            if (clan.IsEliminated || clan.Lords.Count < 1)
                 return;
 
             Dictionary<CultureObject, int> amountsOfCulture = new();
-            foreach (Hero hero in clan.Lords) {
-                if (hero.Culture == null || !hero.IsAlive)
+            foreach (Hero hero in clan.Lords.Where(x => x.IsAlive)) {
+                if (hero.Culture == null)
                     continue;
 
                 if (!amountsOfCulture.ContainsKey(hero.Culture))
@@ -87,9 +103,10 @@ namespace CulturalDrift {
             int settlementTroopWeight = GlobalSettings<MCMConfig>.Instance.SettlementCultureTroopSpawnWeight;
             int defaultTroopWeight = GlobalSettings<MCMConfig>.Instance.DefaultCultureTroopSpawnWeight;
             int clanTroopWeight = GlobalSettings<MCMConfig>.Instance.OwnerClanCultureTroopSpawnWeight;
+            int clanLeaderTroopWeight = GlobalSettings<MCMConfig>.Instance.OwnerClanLeaderCultureTroopSpawnWeight;
             int kingdomTroopWeight = GlobalSettings<MCMConfig>.Instance.KingdomCultureTroopSpawnWeight;
 
-            int totalWeight = settlementTroopWeight + defaultTroopWeight + clanTroopWeight + kingdomTroopWeight;
+            int totalWeight = settlementTroopWeight + defaultTroopWeight + clanTroopWeight + kingdomTroopWeight + clanLeaderTroopWeight;
 
             Dictionary<(int, int), CultureObject> cultureMap = new();
             cultureMap[(1, settlementTroopWeight)] = settlement.Culture;
@@ -104,6 +121,10 @@ namespace CulturalDrift {
                 if (clanTroopWeight > 0) {
                     cultureMap[(currentMin, currentMin + clanTroopWeight)] = settlement.OwnerClan.Culture;
                     currentMin += clanTroopWeight;
+                }
+                if (clanLeaderTroopWeight > 0) {
+                    cultureMap[(currentMin, currentMin + clanLeaderTroopWeight)] = settlement.OwnerClan.Leader.Culture;
+                    currentMin += clanLeaderTroopWeight;
                 }
 
                 if (kingdomTroopWeight > 0 && settlement.OwnerClan.Kingdom != null)
@@ -127,13 +148,16 @@ namespace CulturalDrift {
         private void UpdateCultureDataWithDominantCulture(CultureObject domCulture, float modToUse) {
             bool needToCreate = true;
 
-            foreach (CultureFloat cf in CultureFloats) {
+            foreach (CultureFloat cf in CultureFloats.ToList()) {
                 if (cf.Culture != domCulture)
                     cf.ModifyValue(-modToUse);
                 else {
                     needToCreate = false;
                     cf.ModifyValue(modToUse);
                 }
+
+                if (cf.Value <= 0f)
+                    CultureFloats.Remove(cf);
             }
 
             if (needToCreate)

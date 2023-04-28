@@ -20,10 +20,27 @@ namespace CulturalDrift {
                 return "Need clan name.";
             } else {
                 string clanNameGiven = args[0];
-                foreach (Clan clan in Campaign.Current.Clans)
-                    if (clan.Name.ToString().ToLower().Replace(" ", "") == clanNameGiven.ToLower())
-                        return clan.Culture.GetName().ToString();
-                return "No clan with that name found. Try with no spaces and check for spelling.";
+                Clan? clanToPrint = null;
+                foreach (Clan clan in Campaign.Current.Clans) {
+                    if (clan.Name.ToString().ToLower().Replace(" ", "") == clanNameGiven.ToLower()) {
+                        clanToPrint = clan;
+                        break;
+                    }
+                }
+
+                if (clanToPrint != null) {
+                    CultureData? data = CultureData.GetFor(clanToPrint);
+                    if (data == null)
+                        return "No culture data created for that clan yet. Let some in-game time pass on the campaign map first.";
+
+                    string toReturn = "CULTURE DATA FOR " + clanToPrint.Name.ToString() + "\n";
+                    toReturn += "------------------------------------\n";
+                    foreach (CultureData.CultureFloat cf in data.CultureFloats)
+                        toReturn += cf.Culture.Name.ToString() + " - " + cf.Value.ToString() + "\n";
+                    return toReturn;
+                }
+                else
+                    return "No clan with that name found. Try with no spaces and check for spelling.";
             }
         }
 
@@ -33,10 +50,27 @@ namespace CulturalDrift {
                 return "Need settlement name.";
             } else {
                 string settlementNameGiven = args[0];
-                foreach (Settlement settlement in Campaign.Current.Settlements)
-                    if (settlement.Name.ToString().ToLower().Replace(" ", "") == settlementNameGiven.ToLower())
-                        return settlement.Culture.GetName().ToString();
-                return "No settlement with that name found. Try with no spaces and check for spelling.";
+                Settlement? settlementToPrint = null;
+                foreach (Settlement settlement in Campaign.Current.Settlements) {
+                    if (settlement.Name.ToString().ToLower().Replace(" ", "") == settlementNameGiven.ToLower()) {
+                        settlementToPrint = settlement;
+                        break;
+                    }
+                }
+
+                if (settlementToPrint != null) {
+                    CultureData? data = CultureData.GetFor(settlementToPrint);
+                    if (data == null)
+                        return "No culture data created for that settlement yet. Let some in-game time pass on the campaign map first.";
+
+                    string toReturn = "CULTURE DATA FOR " + settlementToPrint.Name.ToString() + "\n";
+                    toReturn += "------------------------------------\n";
+                    toReturn += "CURRENT CULTURE: " + settlementToPrint.Culture.Name.ToString() + "\n";
+                    foreach (CultureData.CultureFloat cf in data.CultureFloats)
+                        toReturn += cf.Culture.Name.ToString() + " - " + cf.Value.ToString() + "\n";
+                    return toReturn;
+                } else
+                    return "No settlement with that name found. Try with no spaces and check for spelling.";
             }
         }
 

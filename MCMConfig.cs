@@ -50,7 +50,7 @@ namespace CulturalDrift {
 
         [SettingPropertyFloatingInteger("Clan Daily Culture Modifier", 0f, 100f, Order = 1, RequireRestart = false, HintText = "Control the amount of modifier to give a clan culture daily. Culture floats go from 0-100")]
         [SettingPropertyGroup("Daily Modifiers")]
-        public float ClanDailyMod { get; set; } = 0.25f;
+        public float ClanDailyMod { get; set; } = 0.1f;
 
         [SettingPropertyFloatingInteger("Town/Village Daily Culture Modifier", 0f, 100f, Order = 2, RequireRestart = false, HintText = "Control the amount of modifier to give a town/village culture daily. Culture floats go from 0-100")]
         [SettingPropertyGroup("Daily Modifiers")]
@@ -72,9 +72,13 @@ namespace CulturalDrift {
 
         [SettingPropertyInteger("Owner Clan Culture Troops", 0, 100, Order = 3, RequireRestart = false, HintText = "Weight of a settlement spawning its owning clan culture's troops.")]
         [SettingPropertyGroup("Troop Spawning Weights")]
-        public int OwnerClanCultureTroopSpawnWeight { get; set; } = 30;
+        public int OwnerClanCultureTroopSpawnWeight { get; set; } = 15;
 
-        [SettingPropertyInteger("Kingdom Culture Troops", 0, 100, Order = 4, RequireRestart = false, HintText = "Weight of a settlement spawning its kingdom culture's troops.")]
+        [SettingPropertyInteger("Owner Clan Leader Culture Troops", 0, 100, Order = 4, RequireRestart = false, HintText = "Weight of a settlement spawning its owning clan leader culture's troops.")]
+        [SettingPropertyGroup("Troop Spawning Weights")]
+        public int OwnerClanLeaderCultureTroopSpawnWeight { get; set; } = 25;
+
+        [SettingPropertyInteger("Kingdom Culture Troops", 0, 100, Order = 5, RequireRestart = false, HintText = "Weight of a settlement spawning its kingdom culture's troops.")]
         [SettingPropertyGroup("Troop Spawning Weights")]
         public int KingdomCultureTroopSpawnWeight { get; set; } = 20;
 
