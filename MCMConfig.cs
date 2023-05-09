@@ -21,7 +21,7 @@ namespace CulturalDrift {
             Campaign campaign = Campaign.Current;
             if (campaign != null) {
                 foreach (Settlement settlement in campaign.Settlements) {
-                    CultureData settlementCultureData = CulturalDriftBehavior.SettlementCultureData[settlement];
+                    CultureData settlementCultureData = CulturalDriftBehavior.Instance.SettlementCultureData[settlement];
                     List<Hero> notables = settlement.Notables;
                     if (settlementCultureData != null && notables != null) {
                         foreach (Hero notable in notables) {
@@ -38,7 +38,7 @@ namespace CulturalDrift {
             Campaign campaign = Campaign.Current;
             if (campaign != null) {
                 foreach (Clan clan in campaign.Clans) {
-                    CultureData clanCultureData = CulturalDriftBehavior.ClanCultureData[clan];
+                    CultureData clanCultureData = CulturalDriftBehavior.Instance.ClanCultureData[clan];
                     if (clanCultureData != null) {
                         clan.Culture = clanCultureData.DefaultCulture;
                     }

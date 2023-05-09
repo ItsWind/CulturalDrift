@@ -9,8 +9,13 @@ using TaleWorlds.SaveSystem;
 
 namespace CulturalDrift {
     public class CulturalDriftBehavior : CampaignBehaviorBase {
-        public static Dictionary<Settlement, CultureData> SettlementCultureData = new();
-        public static Dictionary<Clan, CultureData> ClanCultureData = new();
+        public static CulturalDriftBehavior Instance;
+        public Dictionary<Settlement, CultureData> SettlementCultureData = new();
+        public Dictionary<Clan, CultureData> ClanCultureData = new();
+
+        public CulturalDriftBehavior() {
+            Instance = this;
+        }
 
         public override void RegisterEvents() {
             CampaignEvents.DailyTickSettlementEvent.AddNonSerializedListener(this, (settlement) => {
@@ -38,9 +43,25 @@ namespace CulturalDrift {
             dataStore.SyncData("ClanCultureData", ref ClanCultureData);
 
             if (dataStore.IsLoading) {
-                // Set settlement cultures, as they do not save/load on their own.
-                foreach (KeyValuePair<Settlement, CultureData> kvp in CulturalDriftBehavior.SettlementCultureData)
+                // Settlements
+                foreach (KeyValuePair<Settlement, CultureData> kvp in Instance.SettlementCultureData.ToList()) {
+                    // FIX BUG
+                    if (!Campaign.Current.Settlements.Contains(kvp.Key)) {
+                        Instance.SettlementCultureData.Remove(kvp.Key);
+                        continue;
+                    }
+
+                    // Set settlement cultures, as they do not save/load on their own.
                     kvp.Key.Culture = kvp.Value.GetMainCulture();
+                }
+                // Clans
+                foreach (KeyValuePair<Clan, CultureData> kvp in Instance.ClanCultureData.ToList()) {
+                    // FIX BUG
+                    if (!Campaign.Current.Clans.Contains(kvp.Key)) {
+                        Instance.ClanCultureData.Remove(kvp.Key);
+                        continue;
+                    }
+                }
             }
         }
     }

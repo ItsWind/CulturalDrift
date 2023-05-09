@@ -141,7 +141,7 @@ namespace CulturalDrift {
                 else if (cultureToChangeTo == null)
                     return "Culture name given not found. Try without spaces and check for spelling.";
 
-                CulturalDriftBehavior.ClanCultureData[clanToChange].ForceCultureData(cultureToChangeTo);
+                CulturalDriftBehavior.Instance.ClanCultureData[clanToChange].ForceCultureData(cultureToChangeTo);
                 clanToChange.Culture = cultureToChangeTo;
                 return clanToChange.Name.ToString() + " changed to " + cultureToChangeTo.Name.ToString();
             }

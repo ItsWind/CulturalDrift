@@ -10,11 +10,11 @@ namespace CulturalDrift {
             if (settlement != null && (settlement.IsVillage || settlement.IsTown)) {
                 CultureData settlementCultureData;
                 try {
-                    settlementCultureData = CulturalDriftBehavior.SettlementCultureData[settlement];
+                    settlementCultureData = CulturalDriftBehavior.Instance.SettlementCultureData[settlement];
                 }
                 catch (KeyNotFoundException) {
                     settlementCultureData = new CultureData(settlement.Culture);
-                    CulturalDriftBehavior.SettlementCultureData[settlement] = settlementCultureData;
+                    CulturalDriftBehavior.Instance.SettlementCultureData[settlement] = settlementCultureData;
                 }
                 CultureObject? cultureToSpawn = settlementCultureData.GetRandomSettlementSpawnCulture(settlement);
                 if (cultureToSpawn != null) {

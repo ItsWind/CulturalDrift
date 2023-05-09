@@ -36,7 +36,7 @@ namespace CulturalDrift {
 
         public static CultureData? GetFor(Settlement settlement) {
             try {
-                return CulturalDriftBehavior.SettlementCultureData[settlement];
+                return CulturalDriftBehavior.Instance.SettlementCultureData[settlement];
             }
             catch (KeyNotFoundException) {
                 return null;
@@ -44,7 +44,7 @@ namespace CulturalDrift {
         }
         public static CultureData? GetFor(Clan clan) {
             try {
-                return CulturalDriftBehavior.ClanCultureData[clan];
+                return CulturalDriftBehavior.Instance.ClanCultureData[clan];
             } catch (KeyNotFoundException) {
                 return null;
             }
@@ -69,7 +69,7 @@ namespace CulturalDrift {
         }
 
         public void UpdateCultureDataAsClan(Clan clan) {
-            if (clan.IsEliminated || clan.Lords.Count < 1)
+            if (clan.IsEliminated || clan.Lords.Count < 1 || clan.Leader == null)
                 return;
 
             Dictionary<CultureObject, int> amountsOfCulture = new();
@@ -83,7 +83,11 @@ namespace CulturalDrift {
                     amountsOfCulture[hero.Culture] += 1;
             }
 
-            CultureObject clanNewCulture = amountsOfCulture.Aggregate((l, r) => l.Value > r.Value ? l : r).Key;
+            CultureObject clanNewCulture = clan.Leader.Culture;
+            try {
+                clanNewCulture = amountsOfCulture.Aggregate((l, r) => l.Value > r.Value ? l : r).Key;
+            } catch (InvalidOperationException) { }
+
             UpdateCultureDataWithDominantCulture(clanNewCulture, GlobalSettings<MCMConfig>.Instance.ClanDailyMod);
             clan.Culture = GetMainCulture();
         }
