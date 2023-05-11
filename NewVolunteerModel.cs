@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using TaleWorlds.CampaignSystem;
 using TaleWorlds.CampaignSystem.GameComponents;
 using TaleWorlds.CampaignSystem.Settlements;
@@ -18,10 +19,28 @@ namespace CulturalDrift {
                 }
                 CultureObject? cultureToSpawn = settlementCultureData.GetRandomSettlementSpawnCulture(settlement);
                 if (cultureToSpawn != null) {
+                    CharacterObject? troopToSpawn = null;
+
                     if (sellerHero.IsRuralNotable && sellerHero.CurrentSettlement.Village.Bound.IsCastle) {
-                        return cultureToSpawn.EliteBasicTroop;
+                        try {
+                            troopToSpawn = cultureToSpawn.EliteBasicTroop;
+                        }
+                        catch (Exception) { }
+
+                        if (troopToSpawn == null)
+                            return settlementCultureData.DefaultCulture.EliteBasicTroop;
                     }
-                    return cultureToSpawn.BasicTroop;
+                    else {
+                        try {
+                            troopToSpawn = cultureToSpawn.BasicTroop;
+                        }
+                        catch (Exception) { }
+
+                        if (troopToSpawn == null)
+                            return settlementCultureData.DefaultCulture.BasicTroop;
+                    }
+
+                    return troopToSpawn;
                 }
             }
             return base.GetBasicVolunteer(sellerHero);

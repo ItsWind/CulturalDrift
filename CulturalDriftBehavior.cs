@@ -19,7 +19,7 @@ namespace CulturalDrift {
 
         public override void RegisterEvents() {
             CampaignEvents.DailyTickSettlementEvent.AddNonSerializedListener(this, (settlement) => {
-                if (settlement.Culture == null)
+                if (settlement.Culture == null || settlement.IsHideout)
                     return;
 
                 if (!SettlementCultureData.ContainsKey(settlement))
@@ -46,7 +46,7 @@ namespace CulturalDrift {
                 // Settlements
                 foreach (KeyValuePair<Settlement, CultureData> kvp in Instance.SettlementCultureData.ToList()) {
                     // FIX BUG
-                    if (!Campaign.Current.Settlements.Contains(kvp.Key)) {
+                    if (!Campaign.Current.Settlements.Contains(kvp.Key) || kvp.Key.IsHideout) {
                         Instance.SettlementCultureData.Remove(kvp.Key);
                         continue;
                     }

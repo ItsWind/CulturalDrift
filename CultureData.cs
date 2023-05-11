@@ -97,7 +97,11 @@ namespace CulturalDrift {
         }
 
         public CultureObject GetMainCulture() {
-            return CultureFloats.Aggregate((l, r) => l.Value > r.Value ? l : r).Culture;
+            CultureObject culture =  CultureFloats.Aggregate((l, r) => l.Value > r.Value ? l : r).Culture;
+            if (Utils.IsCultureValid(culture))
+                return culture;
+            else
+                return DefaultCulture;
         }
 
         public CultureObject? GetRandomSettlementSpawnCulture(Settlement settlement) {
